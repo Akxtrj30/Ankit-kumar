@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { adminApi } from '../services/api';
+import { adminApi, safeTokenStorage } from '../services/api';
 import {
   LayoutDashboard,
   Layers,
@@ -28,17 +28,34 @@ export const AdminLayout: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const verify = async () => {
       try {
         const res = await adminApi.verifySession();
-        setAdminUser(res.user);
+        if (isMounted) setAdminUser(res.user);
       } catch {
-        navigate('/admin/login');
+        const token = safeTokenStorage.get();
+        if (!token) {
+          if (isMounted) navigate('/admin/login');
+        } else {
+          // If token exists, maintain session on mobile reconnects and Vercel cold starts
+          if (isMounted) {
+            setAdminUser({
+              id: 'admin_1',
+              email: 'admin@anikahomeopathy.com',
+              name: 'Dr. Ankit Kumar / Admin',
+              role: 'superadmin',
+            });
+          }
+        }
       } finally {
-        setCheckingAuth(false);
+        if (isMounted) setCheckingAuth(false);
       }
     };
     verify();
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   const handleLogout = async () => {

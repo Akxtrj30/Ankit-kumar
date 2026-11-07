@@ -128,19 +128,85 @@ export const DoctorsManager: React.FC = () => {
     const file = e.target.files?.[0];
     const target = e.target;
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setFeedback({ type: 'error', message: 'Please select a valid image file (JPEG, PNG, WebP).' });
+      if (target) target.value = '';
+      return;
+    }
+
     try {
       setUploadingPhoto(true);
-      const uploadData = new FormData();
-      uploadData.append('image', file);
-      const res = await adminApi.uploadImage(uploadData);
-      const uploadedUrl = res.imageUrl || res.url;
-      if (uploadedUrl) {
-        setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl }));
-        setFeedback({ type: 'success', message: 'Doctor portrait uploaded successfully!' });
-        setTimeout(() => setFeedback(null), 3000);
-      } else {
-        setFeedback({ type: 'error', message: 'Upload succeeded but no image URL was returned.' });
+
+      // Attempt 1: Upload to server API
+      let uploadedUrl: string | null = null;
+      try {
+        const uploadData = new FormData();
+        uploadData.append('image', file);
+        const res = await adminApi.uploadImage(uploadData);
+        uploadedUrl = res.imageUrl || res.url || null;
+      } catch (serverErr) {
+        console.warn('Server upload not reachable or read-only, using resilient embedded image fallback:', serverErr);
       }
+
+      if (uploadedUrl) {
+        setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl! }));
+        setFeedback({ type: 'success', message: 'Doctor portrait uploaded and saved successfully!' });
+        setTimeout(() => setFeedback(null), 3000);
+        return;
+      }
+
+      // Attempt 2: Resilient client-side FileReader with canvas compression for mobile & serverless
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const rawResult = loadEvent.target?.result as string;
+        if (!rawResult) {
+          setFeedback({ type: 'error', message: 'Could not process image file.' });
+          return;
+        }
+
+        // Optimize image size via canvas to avoid storage bloat (<400KB)
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 800;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setFormData((prev) => ({ ...prev, imageUrl: optimizedDataUrl }));
+            setFeedback({ type: 'success', message: 'Doctor portrait embedded and ready to publish!' });
+            setTimeout(() => setFeedback(null), 3000);
+          } else {
+            setFormData((prev) => ({ ...prev, imageUrl: rawResult }));
+            setFeedback({ type: 'success', message: 'Doctor portrait loaded successfully!' });
+            setTimeout(() => setFeedback(null), 3000);
+          }
+        };
+        img.onerror = () => {
+          setFormData((prev) => ({ ...prev, imageUrl: rawResult }));
+          setFeedback({ type: 'success', message: 'Doctor portrait attached!' });
+          setTimeout(() => setFeedback(null), 3000);
+        };
+        img.src = rawResult;
+      };
+      reader.onerror = () => {
+        setFeedback({ type: 'error', message: 'Failed to read image. Please paste an image URL instead.' });
+      };
+      reader.readAsDataURL(file);
     } catch (err: any) {
       setFeedback({ type: 'error', message: err.message || 'Image upload failed. You can paste an image URL instead.' });
     } finally {

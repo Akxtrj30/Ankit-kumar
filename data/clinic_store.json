@@ -395,7 +395,7 @@
     "email": "admin@anikahomeopathy.com",
     "name": "Dr. Ankit Kumar / Admin",
     "role": "superadmin",
-    "passwordHash": "$2b$10$QSLi8VilyN9FDPk.7QWsSeH4LLm4spDE8xNt3Eu4ytyZpXCAu.gPq",
+    "passwordHash": "$2b$10$MgcDeVCwPxa1p4s1q8s49ulmm.HFcS8kaatr.wBgb7vDaxadcloRe",
     "failedAttempts": 0,
     "lockoutUntil": 0
   }
