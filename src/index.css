@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F8F3E7;
+  --color-cream-light: #FCFAF4;
+  --color-navy: #173B78;
+  --color-navy-dark: #0E244B;
+  --color-navy-light: #24529E;
+  --color-green: #248B4B;
+  --color-green-dark: #1A6636;
+  --color-green-light: #32A85F;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: #ffffff;
+    color: #173B78;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}

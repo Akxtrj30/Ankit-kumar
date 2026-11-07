@@ -1,0 +1,6 @@
+{
+  "name": "Anika Homeopathic Clinic",
+  "description": "Anika Homeopathic Clinic - Evidence-based classical homeopathy by Dr. Ankit Kumar (BHMS, AYUSH & NCH Registered). Complete 3D CMS, consultation appointment booking, and visual page builder in Begusarai, Bihar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
