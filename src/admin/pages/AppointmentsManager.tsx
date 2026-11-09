@@ -28,8 +28,10 @@ export const AppointmentsManager: React.FC = () => {
     try {
       const res = await adminApi.getAppointments({ search, status: statusFilter });
       setAppointments(res.data || []);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err?.status !== 401) {
+        console.warn('Could not fetch appointments:', err);
+      }
     } finally {
       setLoading(false);
     }

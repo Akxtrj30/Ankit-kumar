@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { adminApi, safeTokenStorage } from '../services/api';
 import {
   LayoutDashboard,
@@ -23,29 +23,44 @@ import {
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<any>(() => safeTokenStorage.getUser());
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(() => {
+    const token = safeTokenStorage.get();
+    const user = safeTokenStorage.getUser();
+    return !token && !user ? false : true;
+  });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const verify = async () => {
+      const token = safeTokenStorage.get();
+      const user = safeTokenStorage.getUser();
+      if (!token && !user) {
+        if (isMounted) {
+          setAdminUser(null);
+          setCheckingAuth(false);
+        }
+        return;
+      }
       try {
         const res = await adminApi.verifySession();
-        if (isMounted) setAdminUser(res.user);
+        if (isMounted) {
+          setAdminUser(res.user);
+        }
       } catch {
-        const token = safeTokenStorage.get();
-        if (!token) {
-          if (isMounted) navigate('/admin/login');
-        } else {
-          // If token exists, maintain session on mobile reconnects and Vercel cold starts
-          if (isMounted) {
-            setAdminUser({
+        if (isMounted) {
+          // Keep existing session if token exists
+          if (token && token.startsWith('authenticated_session_anika_')) {
+            setAdminUser(user || {
               id: 'admin_1',
               email: 'admin@anikahomeopathy.com',
               name: 'Dr. Ankit Kumar / Admin',
               role: 'superadmin',
             });
+          } else {
+            safeTokenStorage.remove();
+            setAdminUser(null);
           }
         }
       } finally {
@@ -56,7 +71,7 @@ export const AdminLayout: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [navigate]);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -64,6 +79,7 @@ export const AdminLayout: React.FC = () => {
     } catch {
       // ignore
     }
+    setAdminUser(null);
     navigate('/admin/login');
   };
 
@@ -92,6 +108,10 @@ export const AdminLayout: React.FC = () => {
         <p className="text-sm font-bold text-navy">Authenticating Management Portal...</p>
       </div>
     );
+  }
+
+  if (!adminUser) {
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
 
   return (

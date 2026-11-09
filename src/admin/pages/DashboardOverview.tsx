@@ -28,8 +28,10 @@ export const DashboardOverview: React.FC = () => {
     try {
       const res = await adminApi.getAppointments();
       setAppointments(res.data || []);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err?.status !== 401) {
+        console.warn('Could not load appointment stats:', err?.message || err);
+      }
     } finally {
       setLoading(false);
     }

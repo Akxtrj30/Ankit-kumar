@@ -11,30 +11,27 @@
     "facebook": "https://facebook.com/anikahomeopathy",
     "youtube": "https://youtube.com/@anikahomeopathy",
     "address": {
-      "street": "Bakhri Bazar Main Road, Ward No. 26",
-      "municipality": "Bakhri Nagar Parishad",
-      "district": "Begusarai",
       "state": "Bihar",
+      "street": "Bakhri Bazar Main Road, Ward No. 26",
       "pincode": "848201",
+      "district": "Begusarai",
+      "municipality": "Bakhri Nagar Parishad",
       "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115167.3627993427!2d86.1362!3d25.5684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f2136000000001%3A0x7d6f5f3e49e0c5d!2sBakhri%2C%20Bihar!5e0!3m2!1sen!2sin!4v1700000000000"
     },
     "timings": {
-      "morning": "09:00 AM – 02:00 PM",
       "evening": "03:00 PM – 08:00 PM",
+      "morning": "09:00 AM – 02:00 PM",
       "closedDays": [
         "Sunday Evening"
       ],
       "emergencyNote": "Emergency attention is available on call for registered acute cases."
     },
     "announcement": {
-      "isActive": true,
-      "text": "Consultations conducted by physicians graduated from Bihar's premier Government Medical College. Book online OPD tokens below."
+      "text": "Consultations conducted by physicians graduated from Bihar's premier Government Medical College. Book online OPD tokens below.",
+      "isActive": true
     },
     "about": {
       "heading": "Root-Cause Homeopathy Tailored to You",
-      "subheading": "Evidence-informed classical Hahnemannian medicine in Bakhri Bazar, Begusarai, Bihar",
-      "description": "Founded on the purest principles of classical Hahnemannian homeopathy, Anika Homeopathic Clinic delivers individualized holistic medical care. We focus on gently stimulating the natural vital force to eradicate acute afflictions and deep-seated chronic diseases without pharmaceutical suppression.",
-      "establishedYear": "2019",
       "pillars": [
         {
           "title": "Classical Hahnemannian Law",
@@ -52,29 +49,55 @@
           "title": "Govt. AYUSH Registered Team",
           "description": "Consultations conducted by physicians trained in premier government medical institutions."
         }
-      ]
+      ],
+      "subheading": "Evidence-informed classical Hahnemannian medicine in Bakhri Bazar, Begusarai, Bihar",
+      "description": "Founded on the purest principles of classical Hahnemannian homeopathy, Anika Homeopathic Clinic delivers individualized holistic medical care. We focus on gently stimulating the natural vital force to eradicate acute afflictions and deep-seated chronic diseases without pharmaceutical suppression.",
+      "establishedYear": "2019"
     },
     "consultationFee": {
-      "firstVisit": "₹300",
       "followUp": "₹200",
+      "firstVisit": "₹300",
       "medicinePolicy": "Genuine German & SBL homeopathic potentized medicines dispensed at nominal charges."
     },
     "welcomePopup": {
-      "isEnabled": true,
       "badgeText": "Govt. AYUSH Registered Medical Leadership",
-      "hindiHeading": "बिहार के एकमात्र गवर्नमेंट कॉलेज से पढ़े हुए डॉक्टर",
-      "englishSubheading": "Led by Dr. Ankit Kumar (BHMS) — Alumnus of R B T S Govt. Homeopathic Medical College & Hospital, Muzaffarpur",
-      "highlightNotice": "100% Gentle, Non-Suppressive Classical Constitutional Treatment",
+      "isEnabled": true,
       "buttonText": "Explore Website & Consult Doctors",
-      "accentColor": "#D4AF37"
+      "accentColor": "#D4AF37",
+      "hindiHeading": "बिहार के एकमात्र गवर्नमेंट कॉलेज से पढ़े हुए डॉक्टर",
+      "highlightNotice": "100% Gentle, Non-Suppressive Classical Constitutional Treatment",
+      "englishSubheading": "Led by Dr. Ankit Kumar (BHMS) — Alumnus of R B T S Govt. Homeopathic Medical College & Hospital, Muzaffarpur"
     }
   },
   "doctors": [
     {
+      "_id": "doc_2",
+      "name": "Dr. Deepika",
+      "designation": "Consultant Homeopathic Physician (2+ Years)",
+      "qualification": "BHMS",
+      "specialization": "Female Hormonal Health, PCOS/PCOD, Pediatric Care & Respiratory Allergies",
+      "experienceYears": "2+ Years",
+      "college": "R. B. T. S. Govt. Homeopathic Medical College & Hospital",
+      "collegeLocation": "Muzaffarpur & Kolkata",
+      "registrationNumber": "36821",
+      "nchRegistrationNumber": "NRH/0107330",
+      "ministry": "Ministry of AYUSH, Govt. of India",
+      "bio": "Specialist in gynecological, hormonal, and pediatric homeopathy. Passionate about providing natural hormonal rebalancing for women and safe, gentle treatments for young children without synthetic chemicals.",
+      "consultationFee": "₹300",
+      "availableDays": "Tuesday, Thursday, Saturday",
+      "availableTimings": "10:00 AM – 01:00 PM & 04:00 PM – 07:00 PM",
+      "phone": "+91 9122999656",
+      "email": "dr.deepika@anikahomeopathy.com",
+      "imageUrl": "https://images.unsplash.com/photo-1594824813583-a9d0263f35fa?auto=format&fit=crop&q=80&w=800",
+      "orderIndex": 1,
+      "isActive": true,
+      "isChief": true
+    },
+    {
       "_id": "doc_1",
       "name": "Dr. Ankit Kumar",
       "designation": "Chief Homeopathic Physician & Founder",
-      "qualification": "BHMS (Gold Medalist)",
+      "qualification": "BHMS",
       "specialization": "Chronic Diseases, Skin Disorders & Constitutional Medicine",
       "experienceYears": "6+ Years",
       "college": "R. B. T. S. Govt. Homeopathic Medical College & Hospital",
@@ -88,33 +111,10 @@
       "availableTimings": "09:00 AM – 02:00 PM & 03:00 PM – 08:00 PM",
       "phone": "+91 9122999656",
       "email": "dr.ankit@anikahomeopathy.com",
-      "imageUrl": "\"C:\\Users\\ak30d\\OneDrive\\Desktop\\WhatsApp Image 2026-11-04 at 10.02.05 PM.jpeg\"",
+      "imageUrl": "/dr_ankit_kumar.jpg",
       "orderIndex": 0,
       "isActive": true,
       "isChief": true
-    },
-    {
-      "_id": "doc_2",
-      "name": "Dr. Sneha Verma",
-      "designation": "Consultant Homeopathic Physician",
-      "qualification": "BHMS, MD (Homeopathy)",
-      "specialization": "Female Hormonal Health, PCOS/PCOD, Pediatric Care & Respiratory Allergies",
-      "experienceYears": "5+ Years",
-      "college": "National Institute of Homeopathy & RBTS Govt. Hospital",
-      "collegeLocation": "Muzaffarpur & Kolkata",
-      "registrationNumber": "39410",
-      "nchRegistrationNumber": "NRH/0118420",
-      "ministry": "Ministry of AYUSH, Govt. of India",
-      "bio": "Specialist in gynecological, hormonal, and pediatric homeopathy. Passionate about providing natural hormonal rebalancing for women and safe, gentle treatments for young children without synthetic chemicals.",
-      "consultationFee": "₹300",
-      "availableDays": "Tuesday, Thursday, Saturday",
-      "availableTimings": "10:00 AM – 01:00 PM & 04:00 PM – 07:00 PM",
-      "phone": "+91 9122999656",
-      "email": "dr.sneha@anikahomeopathy.com",
-      "imageUrl": "https://images.unsplash.com/photo-1594824813583-a9d0263f35fa?auto=format&fit=crop&q=80&w=800",
-      "orderIndex": 1,
-      "isActive": true,
-      "isChief": false
     }
   ],
   "services": [
@@ -360,6 +360,21 @@
   },
   "appointments": [
     {
+      "_id": "app_1794217840841_0fjn",
+      "referenceNumber": "AHC-M3Z0CW",
+      "patientName": "Ayush",
+      "mobileNumber": "9199501957",
+      "age": 20,
+      "preferredDoctorId": "doc_2",
+      "preferredDoctorName": "Dr. Deepika",
+      "preferredDate": "2026-11-10",
+      "preferredTimeSlot": "Morning (09:00 AM - 02:00 PM)",
+      "reasonForConsultation": "ilness",
+      "status": "Pending",
+      "adminNotes": "",
+      "createdAt": "2026-11-09T09:50:40.841Z"
+    },
+    {
       "_id": "app_seed_1",
       "referenceNumber": "AHC-A89E21",
       "patientName": "Rameshwar Prasad",
@@ -395,7 +410,7 @@
     "email": "admin@anikahomeopathy.com",
     "name": "Dr. Ankit Kumar / Admin",
     "role": "superadmin",
-    "passwordHash": "$2b$10$MgcDeVCwPxa1p4s1q8s49ulmm.HFcS8kaatr.wBgb7vDaxadcloRe",
+    "passwordHash": "$2b$10$6Ur7zS6p3PDuoD4UX7xA7uVJ7VzlqaytSPZYhRo3IIZg7.Qs8fGie",
     "failedAttempts": 0,
     "lockoutUntil": 0
   }

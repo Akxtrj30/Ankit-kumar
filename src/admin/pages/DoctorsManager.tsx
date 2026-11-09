@@ -22,6 +22,18 @@ import {
   Check,
 } from 'lucide-react';
 
+export const cleanImageUrl = (url?: string | null): string => {
+  if (!url) return '';
+  let clean = url.trim();
+  if ((clean.startsWith('"') && clean.endsWith('"')) || (clean.startsWith("'") && clean.endsWith("'"))) {
+    clean = clean.slice(1, -1).trim();
+  }
+  if (clean.startsWith('C:') || clean.startsWith('c:') || clean.startsWith('file://')) {
+    return '';
+  }
+  return clean;
+};
+
 export const DoctorsManager: React.FC = () => {
   const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +99,10 @@ export const DoctorsManager: React.FC = () => {
 
   const openEditModal = (doc: DoctorProfile) => {
     setEditingDoctor(doc);
-    setFormData({ ...doc });
+    setFormData({
+      ...doc,
+      imageUrl: cleanImageUrl(doc.imageUrl),
+    });
     setShowModal(true);
   };
 
@@ -138,34 +153,31 @@ export const DoctorsManager: React.FC = () => {
     try {
       setUploadingPhoto(true);
 
-      // Attempt 1: Upload to server API
-      let uploadedUrl: string | null = null;
+      // Attempt 1: Server-side multer disk upload
+      let uploadedServerUrl: string | null = null;
       try {
         const uploadData = new FormData();
         uploadData.append('image', file);
         const res = await adminApi.uploadImage(uploadData);
-        uploadedUrl = res.imageUrl || res.url || null;
+        uploadedServerUrl = res.imageUrl || res.url || null;
       } catch (serverErr) {
-        console.warn('Server upload not reachable or read-only, using resilient embedded image fallback:', serverErr);
+        console.warn('Server upload not reachable or ephemeral, using persistent compressed image fallback:', serverErr);
       }
 
-      if (uploadedUrl) {
-        setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl! }));
-        setFeedback({ type: 'success', message: 'Doctor portrait uploaded and saved successfully!' });
-        setTimeout(() => setFeedback(null), 3000);
-        return;
-      }
-
-      // Attempt 2: Resilient client-side FileReader with canvas compression for mobile & serverless
+      // Convert to resilient canvas-compressed Base64 Data URL so portrait survives cloud container restarts
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const rawResult = loadEvent.target?.result as string;
         if (!rawResult) {
-          setFeedback({ type: 'error', message: 'Could not process image file.' });
+          if (uploadedServerUrl) {
+            setFormData((prev) => ({ ...prev, imageUrl: uploadedServerUrl! }));
+            setFeedback({ type: 'success', message: 'Photo attached! Click "Update Doctor" below to save changes permanently.' });
+            setTimeout(() => setFeedback(null), 4000);
+          }
           return;
         }
 
-        // Optimize image size via canvas to avoid storage bloat (<400KB)
+        // Optimize image size via canvas to avoid storage bloat (<250KB)
         const img = new Image();
         img.onload = () => {
           const maxDim = 800;
@@ -187,28 +199,33 @@ export const DoctorsManager: React.FC = () => {
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
             const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            setFormData((prev) => ({ ...prev, imageUrl: optimizedDataUrl }));
-            setFeedback({ type: 'success', message: 'Doctor portrait embedded and ready to publish!' });
-            setTimeout(() => setFeedback(null), 3000);
+            // Prioritize clean static server URL if multer disk storage succeeded, otherwise use compressed canvas data URL
+            const finalImgUrl = uploadedServerUrl || optimizedDataUrl;
+            setFormData((prev) => ({ ...prev, imageUrl: finalImgUrl }));
           } else {
-            setFormData((prev) => ({ ...prev, imageUrl: rawResult }));
-            setFeedback({ type: 'success', message: 'Doctor portrait loaded successfully!' });
-            setTimeout(() => setFeedback(null), 3000);
+            setFormData((prev) => ({ ...prev, imageUrl: uploadedServerUrl || rawResult }));
           }
+          setFeedback({ type: 'success', message: 'Portrait photo attached! Please click "Update Doctor" below to save permanently.' });
+          setTimeout(() => setFeedback(null), 4500);
         };
         img.onerror = () => {
-          setFormData((prev) => ({ ...prev, imageUrl: rawResult }));
-          setFeedback({ type: 'success', message: 'Doctor portrait attached!' });
-          setTimeout(() => setFeedback(null), 3000);
+          setFormData((prev) => ({ ...prev, imageUrl: uploadedServerUrl || rawResult }));
+          setFeedback({ type: 'success', message: 'Portrait photo attached! Click "Update Doctor" below to save permanently.' });
+          setTimeout(() => setFeedback(null), 4500);
         };
         img.src = rawResult;
       };
       reader.onerror = () => {
-        setFeedback({ type: 'error', message: 'Failed to read image. Please paste an image URL instead.' });
+        if (uploadedServerUrl) {
+          setFormData((prev) => ({ ...prev, imageUrl: uploadedServerUrl! }));
+          setFeedback({ type: 'success', message: 'Photo attached! Click "Update Doctor" below to save permanently.' });
+        } else {
+          setFeedback({ type: 'error', message: 'Failed to read image file. Please try another image.' });
+        }
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Image upload failed. You can paste an image URL instead.' });
+      setFeedback({ type: 'error', message: err.message || 'Image processing failed.' });
     } finally {
       setUploadingPhoto(false);
       if (target) target.value = '';
@@ -393,11 +410,23 @@ export const DoctorsManager: React.FC = () => {
                 {/* Main Card Content */}
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-cream border border-navy/10 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
-                    {doc.imageUrl ? (
+                    {cleanImageUrl(doc.imageUrl) ? (
                       <img
-                        src={doc.imageUrl}
+                        key={cleanImageUrl(doc.imageUrl)}
+                        src={cleanImageUrl(doc.imageUrl)}
                         alt={doc.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.doctor-initials-fallback')) {
+                            const fallback = document.createElement('div');
+                            fallback.className = 'doctor-initials-fallback text-navy font-serif font-black text-xl';
+                            fallback.innerText = doc.name.split(' ').map((n) => n[0]).join('').slice(0, 2);
+                            parent.appendChild(fallback);
+                          }
+                        }}
                       />
                     ) : (
                       <div className="text-navy font-serif font-black text-xl">
@@ -499,11 +528,15 @@ export const DoctorsManager: React.FC = () => {
               {/* Photo Upload & Preview */}
               <div className="flex items-center gap-5 p-4 bg-slate-50 rounded-2xl border border-gray-200">
                 <div className="w-20 h-20 rounded-2xl bg-white border border-gray-300 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
-                  {formData.imageUrl ? (
+                  {cleanImageUrl(formData.imageUrl) ? (
                     <img
-                      src={formData.imageUrl}
+                      key={cleanImageUrl(formData.imageUrl)}
+                      src={cleanImageUrl(formData.imageUrl)}
                       alt="Preview"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = 'none';
+                      }}
                     />
                   ) : (
                     <Stethoscope className="w-8 h-8 text-gray-300" />
@@ -527,16 +560,25 @@ export const DoctorsManager: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Or paste image URL (e.g. /assets/uploads/...)"
+                      placeholder="Or paste image URL (e.g. /assets/uploads/... or web link)"
                       value={formData.imageUrl || ''}
-                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val.startsWith('C:') || val.startsWith('c:') || val.startsWith('file://')) {
+                          setFeedback({
+                            type: 'error',
+                            message: 'Local paths (C:\\...) cannot be viewed by web browsers. Please use the "Upload Photo" button instead.',
+                          });
+                        }
+                        setFormData({ ...formData, imageUrl: cleanImageUrl(val) });
+                      }}
                       className="flex-1 px-3 py-1.5 border rounded-lg bg-white"
                     />
                   </div>
                   {uploadingPhoto && (
                     <div className="flex items-center gap-2 text-xs text-green font-semibold animate-pulse">
                       <div className="w-3.5 h-3.5 border-2 border-green border-t-transparent rounded-full animate-spin" />
-                      <span>Uploading photograph to clinic storage...</span>
+                      <span>Compressing & attaching photograph...</span>
                     </div>
                   )}
                   <p className="text-[11px] text-gray-500">
@@ -777,6 +819,13 @@ export const DoctorsManager: React.FC = () => {
                     Chief Homeopathic Physician
                   </span>
                 </label>
+              </div>
+
+              {/* Save Notice Banner */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-900 flex items-center justify-between gap-3">
+                <span className="font-medium">
+                  {formData.imageUrl ? '✓ Portrait attached.' : 'Fields ready.'} Click <strong>{editingDoctor ? 'Update Doctor' : 'Publish New Doctor'}</strong> to permanently save changes to the database.
+                </span>
               </div>
 
               {/* Modal Footer Actions */}

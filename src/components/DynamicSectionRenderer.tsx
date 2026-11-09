@@ -319,11 +319,22 @@ const DoctorSection: React.FC<{
                 {/* Doctor Header with Photo */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pb-5 border-b border-navy/10">
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-cream border-2 border-green/30 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                    {doc.imageUrl ? (
+                    {doc.imageUrl && !doc.imageUrl.startsWith('C:') && !doc.imageUrl.startsWith('c:') ? (
                       <img
-                        src={doc.imageUrl}
+                        src={doc.imageUrl.replace(/^["']|["']$/g, '')}
                         alt={doc.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.doctor-fallback-avatar')) {
+                            const fallback = document.createElement('div');
+                            fallback.className = 'doctor-fallback-avatar w-full h-full flex items-center justify-center bg-navy text-cream font-serif font-black text-2xl';
+                            fallback.innerText = doc.name.split(' ').map((n) => n[0]).join('').slice(0, 2);
+                            parent.appendChild(fallback);
+                          }
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-navy text-cream font-serif font-black text-2xl">

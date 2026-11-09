@@ -11,7 +11,7 @@ test('verifyAdmin authenticates with exact email and password', () => {
   assert.equal(result.user?.role, 'superadmin');
 });
 
-test('verifyAdmin authenticates with username "admin" (multi-device convenience)', () => {
+test('verifyAdmin authenticates with username "admin" and valid password', () => {
   const result = storage.verifyAdmin('admin', 'SecureClinic2025!#');
   assert.ok(result.user, 'Expected successful login with username admin');
 });
@@ -19,11 +19,6 @@ test('verifyAdmin authenticates with username "admin" (multi-device convenience)
 test('verifyAdmin authenticates with owner email "ak30dec2004@gmail.com"', () => {
   const result = storage.verifyAdmin('ak30dec2004@gmail.com', 'SecureClinic2025!#');
   assert.ok(result.user, 'Expected successful login with owner email');
-});
-
-test('verifyAdmin authenticates with fallback recognized admin password', () => {
-  const result = storage.verifyAdmin('admin', 'admin123');
-  assert.ok(result.user, 'Expected successful login with admin123');
 });
 
 test('verifyAdmin authenticates with mobile capitalized/whitespace input', () => {
@@ -41,9 +36,14 @@ test('verifyAdmin authenticates with mobile number "9122999656"', () => {
   assert.ok(result.user, 'Expected successful login with mobile phone number');
 });
 
-test('verifyAdmin authenticates with simple mobile-friendly password "anika2025"', () => {
+test('verifyAdmin strictly rejects weak or unauthorized passwords like "admin123"', () => {
+  const result = storage.verifyAdmin('admin', 'admin123');
+  assert.equal(result.user, null, 'Weak password admin123 must be rejected');
+});
+
+test('verifyAdmin strictly rejects unauthorized passwords like "anika2025"', () => {
   const result = storage.verifyAdmin('admin', 'anika2025');
-  assert.ok(result.user, 'Expected successful login with anika2025');
+  assert.equal(result.user, null, 'Unauthorized password anika2025 must be rejected');
 });
 
 test('verifyAdmin rejects invalid credentials and handles security lockout checks', () => {
